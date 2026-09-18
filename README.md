@@ -50,6 +50,9 @@ BF16 experiment with:
 python -m miniscale.train --config configs/local_4060_120m.yaml
 ```
 
+The measured systems baseline, including its mid-run throughput change and limitations, is
+documented in [`benchmarks/local-rtx4060-120m.md`](benchmarks/local-rtx4060-120m.md).
+
 Resume from a checkpoint while overriding the final step and output directory:
 
 ```bash
