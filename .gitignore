@@ -12,3 +12,4 @@ wandb/
 *.pth
 *.ckpt
 *.safetensors
+*.egg-info/

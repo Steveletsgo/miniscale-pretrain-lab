@@ -29,3 +29,18 @@ def test_checkpoint_round_trip(tmp_path: Path) -> None:
     for name, value in model.state_dict().items():
         assert torch.equal(value, original[name])
 
+
+def test_checkpoint_round_trip_with_cuda_map_location(tmp_path: Path) -> None:
+    if not torch.cuda.is_available():
+        return
+
+    device = torch.device("cuda")
+    model = torch.nn.Linear(4, 2).to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda _: 1.0)
+    path = tmp_path / "checkpoint-cuda.pt"
+
+    save_checkpoint(path, model, optimizer, scheduler, 11, {"name": "cuda-test"})
+    step = load_checkpoint(path, model, optimizer, scheduler, device)
+
+    assert step == 11

@@ -26,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", required=True)
     parser.add_argument("--run-dir")
     parser.add_argument("--resume")
+    parser.add_argument("--max-steps", type=int)
     return parser.parse_args()
 
 
@@ -192,6 +193,8 @@ def train(config: ExperimentConfig) -> None:
     metrics_path = run_dir / "metrics.jsonl"
     optimizer.zero_grad(set_to_none=True)
     for step in range(start_step + 1, config.train.max_steps + 1):
+        if context.device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(context.device)
         step_started = time.perf_counter()
         accumulated_loss = torch.zeros((), device=context.device)
         tokens = 0
@@ -235,6 +238,15 @@ def train(config: ExperimentConfig) -> None:
                 "tokens_per_second": tokens / elapsed,
                 "world_size": context.world_size,
             }
+            if context.device.type == "cuda":
+                record.update(
+                    {
+                        "peak_allocated_gib": torch.cuda.max_memory_allocated(context.device)
+                        / 1024**3,
+                        "peak_reserved_gib": torch.cuda.max_memory_reserved(context.device)
+                        / 1024**3,
+                    }
+                )
             append_metric(metrics_path, record)
             print(json.dumps(record))
 
@@ -275,6 +287,10 @@ def main() -> None:
         config.output.run_dir = args.run_dir
     if args.resume:
         config.output.resume_from = args.resume
+    if args.max_steps is not None:
+        if args.max_steps <= 0:
+            raise ValueError("--max-steps must be positive")
+        config.train.max_steps = args.max_steps
     train(config)
 
 

@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 def capture_rng_state() -> dict[str, Any]:
@@ -23,9 +23,12 @@ def capture_rng_state() -> dict[str, Any]:
 def restore_rng_state(state: dict[str, Any]) -> None:
     random.setstate(state["python"])
     np.random.set_state(state["numpy"])
-    torch.set_rng_state(state["torch"])
+    # A checkpoint loaded with ``map_location=cuda`` also moves serialized CPU
+    # RNG tensors to CUDA. PyTorch's RNG restoration APIs require CPU byte
+    # tensors, so normalize them before restoring state.
+    torch.set_rng_state(state["torch"].cpu())
     if torch.cuda.is_available() and "cuda" in state:
-        torch.cuda.set_rng_state_all(state["cuda"])
+        torch.cuda.set_rng_state_all([rng_state.cpu() for rng_state in state["cuda"]])
 
 
 def unwrap_model(model: nn.Module) -> nn.Module:
@@ -70,4 +73,3 @@ def load_checkpoint(
     scheduler.load_state_dict(checkpoint["scheduler"])
     restore_rng_state(checkpoint["rng_state"])
     return int(checkpoint["step"])
-

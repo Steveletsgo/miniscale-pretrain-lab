@@ -43,6 +43,23 @@ pytest -q
 python -m miniscale.train --config configs/smoke_cpu.yaml
 ```
 
+On the validated 8GB RTX 4060 Laptop development machine, run the short 117.8M-parameter
+BF16 experiment with:
+
+```bash
+python -m miniscale.train --config configs/local_4060_120m.yaml
+```
+
+Resume from a checkpoint while overriding the final step and output directory:
+
+```bash
+python -m miniscale.train \
+  --config configs/local_4060_120m.yaml \
+  --resume runs/local_4060_120m/final.pt \
+  --max-steps 22 \
+  --run-dir runs/local_4060_resume
+```
+
 Run on four GPUs with DDP:
 
 ```bash
@@ -90,6 +107,7 @@ Every published experiment must report:
 ## Roadmap
 
 - [x] CPU smoke test and baseline model
+- [x] Local RTX 4060 Laptop BF16 systems baseline
 - [x] DDP-compatible training loop
 - [x] deterministic checkpoint/resume
 - [ ] Validate BF16 training on one cloud GPU
@@ -99,4 +117,3 @@ Every published experiment must report:
 - [ ] Run Qwen2.5-1.5B continual pretraining experiment
 - [ ] Add profiler traces and failure-injection report
 - [ ] Add optional frozen-vision-encoder multimodal alignment experiment
-
