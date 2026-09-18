@@ -132,4 +132,3 @@ The next bounded milestone is a fused Triton RMSNorm or SwiGLU kernel with:
 3. warm-up and repeated latency measurements;
 4. effective-bandwidth reporting and profiler evidence where WSL permits it;
 5. an honest comparison against PyTorch eager and `torch.compile`.
-
