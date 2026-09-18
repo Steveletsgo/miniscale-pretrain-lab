@@ -56,6 +56,36 @@ documented in [`benchmarks/local-rtx4060-120m.md`](benchmarks/local-rtx4060-120m
 The first real-corpus learning curve is documented in
 [`benchmarks/local-rtx4060-fineweb-120m.md`](benchmarks/local-rtx4060-fineweb-120m.md).
 
+## WSL CUDA operator development
+
+The validated local operator-development environment lives in the `Ubuntu-AI` WSL
+distribution on `D:`. It includes CUDA 12.8, PyTorch 2.7.0+cu128, Triton 3.3.0 and the native
+C++/CUDA build toolchain. Enter it from PowerShell and activate it with:
+
+```powershell
+wsl -d Ubuntu-AI
+```
+
+```bash
+cd /mnt/d/AI-Projects/miniscale-pretrain-lab
+source scripts/activate_wsl_env.sh
+source /home/ai/.venvs/miniscale/bin/activate
+```
+
+Run the three compilation/execution smoke tests:
+
+```bash
+mkdir -p /tmp/miniscale-cuda
+nvcc -O3 -std=c++17 -arch=sm_89 benchmarks/cuda/vector_add.cu \
+  -o /tmp/miniscale-cuda/vector_add
+/tmp/miniscale-cuda/vector_add
+python benchmarks/cuda/torch_extension_smoke.py
+python benchmarks/triton/vector_add.py
+```
+
+See [`docs/wsl-cuda-environment.md`](docs/wsl-cuda-environment.md) for the exact versions,
+measured smoke benchmark and current WSL profiling limitations.
+
 Resume from a checkpoint while overriding the final step and output directory:
 
 ```bash
