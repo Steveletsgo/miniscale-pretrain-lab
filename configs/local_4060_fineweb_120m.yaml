@@ -1,0 +1,40 @@
+model:
+  vocab_size: 32000
+  num_layers: 12
+  hidden_size: 768
+  num_attention_heads: 12
+  num_kv_heads: 4
+  intermediate_size: 2688
+  max_sequence_length: 256
+  rope_base: 10000.0
+  dropout: 0.0
+  tie_embeddings: true
+
+data:
+  train_path: data/processed/fineweb_edu_train.bin
+  validation_path: data/processed/fineweb_edu_validation.bin
+  dtype: uint32
+  synthetic_train_samples: 0
+  synthetic_validation_samples: 0
+  num_workers: 0
+
+train:
+  seed: 1337
+  strategy: single
+  precision: bf16
+  micro_batch_size: 2
+  gradient_accumulation_steps: 4
+  max_steps: 100
+  eval_interval: 25
+  eval_batches: 10
+  checkpoint_interval: 1000
+  log_interval: 1
+  learning_rate: 0.0003
+  min_learning_rate: 0.00003
+  warmup_steps: 10
+  weight_decay: 0.1
+  max_grad_norm: 1.0
+
+output:
+  run_dir: runs/local_4060_fineweb_120m
+  resume_from: null

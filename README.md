@@ -72,6 +72,16 @@ torchrun --standalone --nproc-per-node=4 \
 
 ## Data preparation
 
+Stream a bounded FineWeb-Edu slice. This command reads the upstream dataset lazily and stops
+after 5,000 accepted documents or 40 million characters, whichever is reached first:
+
+```bash
+python scripts/download_fineweb_edu.py --output-dir data/raw/fineweb_edu
+```
+
+FineWeb-Edu is published by Hugging Face under the ODC-By license; see the
+[official dataset card](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu).
+
 Train a 32K BPE tokenizer from newline-delimited JSON:
 
 ```bash
@@ -90,6 +100,12 @@ python scripts/prepare_data.py \
   --tokenizer data/tokenizer/tokenizer.json \
   --output data/processed/train.bin \
   --text-field text
+```
+
+Repeat `prepare_data.py` for `validation.jsonl`, then run the local real-corpus experiment:
+
+```bash
+python -m miniscale.train --config configs/local_4060_fineweb_120m.yaml
 ```
 
 Data, checkpoints and credentials are intentionally excluded from Git.
